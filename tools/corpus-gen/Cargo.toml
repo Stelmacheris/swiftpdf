@@ -1,0 +1,20 @@
+[package]
+name = "swiftpdf-corpus-gen"
+description = "Generates the SwiftPDF test corpus (original PDFs only, no copyrighted files)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "corpus_gen"
+
+[[bin]]
+name = "corpus-gen"
+path = "src/main.rs"
+
+[dev-dependencies]
+# Independent PDF parser (MIT) used only to verify the generated files.
+lopdf = "0.46.0"

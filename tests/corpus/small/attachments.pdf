@@ -1,0 +1,70 @@
+%PDF-1.7
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [(data.csv) 10 0 R (hello.txt) 9 0 R] >> >> >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Rotate 0 /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject <<  >> >> /Contents 6 0 R /Annots [11 0 R] >>
+endobj
+6 0 obj
+<<  /Length 134 >>
+stream
+BT /F2 24 Tf 72 720 Td (Document with attachments) Tj /F1 12 Tf 0 -36 Td 16 TL
+(Two embedded files: hello.txt and data.csv.) Tj T*
+ET
+
+endstream
+endobj
+7 0 obj
+<< /Type /EmbeddedFile /Subtype /text#2Fplain /Params << /Size 29 >> /Length 29 >>
+stream
+Hello from an embedded file.
+
+endstream
+endobj
+8 0 obj
+<< /Type /EmbeddedFile /Subtype /text#2Fcsv /Params << /Size 23 >> /Length 23 >>
+stream
+id,name
+1,alpha
+2,beta
+
+endstream
+endobj
+9 0 obj
+<< /Type /Filespec /F (hello.txt) /UF (hello.txt) /Desc (Sample hello.txt) /EF << /F 7 0 R >> >>
+endobj
+10 0 obj
+<< /Type /Filespec /F (data.csv) /UF (data.csv) /Desc (Sample data.csv) /EF << /F 8 0 R >> >>
+endobj
+11 0 obj
+<< /Type /Annot /Subtype /FileAttachment /Rect [72 600 92 620] /Name /Paperclip /Contents (hello.txt) /FS 9 0 R >>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000015 00000 n 
+0000000143 00000 n 
+0000000200 00000 n 
+0000000297 00000 n 
+0000000399 00000 n 
+0000000578 00000 n 
+0000000764 00000 n 
+0000000909 00000 n 
+0000001046 00000 n 
+0000001158 00000 n 
+0000001268 00000 n 
+trailer
+<< /Size 12 /Root 1 0 R >>
+startxref
+1399
+%%EOF

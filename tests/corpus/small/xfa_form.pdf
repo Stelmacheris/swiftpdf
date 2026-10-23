@@ -1,0 +1,92 @@
+%PDF-1.7
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R /AcroForm 15 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Rotate 0 /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject <<  >> >> /Contents 6 0 R /Annots [8 0 R 9 0 R 11 0 R 12 0 R 13 0 R 14 0 R] >>
+endobj
+6 0 obj
+<<  /Length 73 >>
+stream
+BT /F2 24 Tf 72 720 Td (XFA-flagged form) Tj /F1 12 Tf 0 -36 Td 16 TL
+ET
+
+endstream
+endobj
+7 0 obj
+<< /Type /XObject /Subtype /Form /BBox [0 0 20 20] /Length 3 >>
+stream
+q Q
+endstream
+endobj
+8 0 obj
+<< /Type /Annot /Subtype /Widget /F 4 /P 5 0 R /Rect [72 650 300 674] /FT /Tx /T (full_name) /V (Ada Lovelace) /DA (/Helv 12 Tf 0 g) >>
+endobj
+9 0 obj
+<< /Type /Annot /Subtype /Widget /F 4 /P 5 0 R /Rect [72 610 92 630] /FT /Btn /T (agree) /V /Off /AS /Off /AP << /N << /On 7 0 R /Off 7 0 R >> >> >>
+endobj
+10 0 obj
+<< /FT /Btn /Ff 32768 /T (size) /V /Small /Kids [11 0 R 12 0 R] >>
+endobj
+11 0 obj
+<< /Type /Annot /Subtype /Widget /F 4 /P 5 0 R /Rect [72 570 92 590] /Parent 10 0 R /AS /Small /AP << /N << /Small 7 0 R /Off 7 0 R >> >> >>
+endobj
+12 0 obj
+<< /Type /Annot /Subtype /Widget /F 4 /P 5 0 R /Rect [120 570 140 590] /Parent 10 0 R /AS /Off /AP << /N << /Large 7 0 R /Off 7 0 R >> >> >>
+endobj
+13 0 obj
+<< /Type /Annot /Subtype /Widget /F 4 /P 5 0 R /Rect [72 530 300 552] /FT /Ch /Ff 131072 /T (color) /Opt [(Red) (Green) (Blue)] /V (Green) /DA (/Helv 12 Tf 0 g) >>
+endobj
+14 0 obj
+<< /Type /Annot /Subtype /Widget /F 4 /P 5 0 R /Rect [72 420 300 510] /FT /Ch /T (fruit) /Opt [(Apple) (Banana) (Cherry) (Date)] /V (Banana) /DA (/Helv 12 Tf 0 g) >>
+endobj
+15 0 obj
+<< /Fields [8 0 R 9 0 R 10 0 R 13 0 R 14 0 R] /NeedAppearances true /DA (/Helv 12 Tf 0 g) /DR << /Font << /Helv 3 0 R >> >> /XFA [(template) 16 0 R (datasets) 17 0 R] >>
+endobj
+16 0 obj
+<<  /Length 207 >>
+stream
+<?xml version="1.0"?><xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/"><template xmlns="http://www.xfa.org/schema/xfa-template/3.3/"><subform name="form1"><field name="full_name"/></subform></template></xdp:xdp>
+endstream
+endobj
+17 0 obj
+<<  /Length 173 >>
+stream
+<?xml version="1.0"?><xfa:datasets xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/"><xfa:data><form1><full_name>Ada Lovelace</full_name></form1></xfa:data></xfa:datasets>
+endstream
+endobj
+xref
+0 18
+0000000000 65535 f 
+0000000015 00000 n 
+0000000081 00000 n 
+0000000138 00000 n 
+0000000235 00000 n 
+0000000337 00000 n 
+0000000549 00000 n 
+0000000673 00000 n 
+0000000773 00000 n 
+0000000924 00000 n 
+0000001088 00000 n 
+0000001171 00000 n 
+0000001328 00000 n 
+0000001485 00000 n 
+0000001665 00000 n 
+0000001847 00000 n 
+0000002033 00000 n 
+0000002293 00000 n 
+trailer
+<< /Size 18 /Root 1 0 R >>
+startxref
+2519
+%%EOF
