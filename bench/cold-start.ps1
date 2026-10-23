@@ -1,14 +1,19 @@
 <#
 .SYNOPSIS
-  Measures SwiftPDF start-up: process start -> visible main window (first paint), plus WebView2
-  process count and memory. Used by T-005 and later by the benchmark harness (T-010).
+  Measures SwiftPDF start-up: process start -> visible main window, process start -> content
+  painted, plus WebView2 process count and memory. Used by T-005, T-111 and later by the benchmark
+  harness (T-010).
 
 .DESCRIPTION
   Each run launches the release exe, then measures two numbers:
     wall_ms     External clock: from just before CreateProcess until a visible top-level window
                 owned by the process exists (polled about every 1 ms).
-    internal_ms From the kernel's process creation time until Rust has shown the window after the
-                UI's first paint. Written by the app when SWIFTPDF_STARTUP_LOG is set (off by default).
+                Since T-111 the window is created visible with the theme background, so this is
+                the "visible window" time (an empty dark frame while WebView2 starts).
+    internal_ms "Content visible": from the kernel's process creation time until the UI reports its
+                first paint (`window_ready` writes the `content_ready` mark). Written by the app only
+                when SWIFTPDF_STARTUP_LOG is set (off by default). Builds before T-111 wrote
+                `shown_by_ui` / `shown_by_fallback` instead; those marks are still read.
   After the window is visible the script waits SettleMs, then samples the app and all of its
   descendant processes (the WebView2 msedgewebview2.exe processes): count, working set, private bytes.
 
@@ -246,8 +251,9 @@ for ($run = 1; $run -le $Runs; $run++) {
             if (-not $marks.ContainsKey($parts[0])) { $marks[$parts[0]] = [double]$parts[1] }
         }
     }
-    $shownBy = if ($marks.ContainsKey('shown_by_ui')) { 'ui' } elseif ($marks.ContainsKey('shown_by_fallback')) { 'fallback' } else { 'none' }
-    $shownUs = if ($shownBy -eq 'ui') { $marks['shown_by_ui'] } elseif ($shownBy -eq 'fallback') { $marks['shown_by_fallback'] } else { $null }
+    # content_ready: T-111 and later. shown_by_*: older builds that showed the window on first paint.
+    $shownBy = if ($marks.ContainsKey('content_ready') -or $marks.ContainsKey('shown_by_ui')) { 'ui' } elseif ($marks.ContainsKey('shown_by_fallback')) { 'fallback' } else { 'none' }
+    $shownUs = if ($marks.ContainsKey('content_ready')) { $marks['content_ready'] } elseif ($marks.ContainsKey('shown_by_ui')) { $marks['shown_by_ui'] } elseif ($marks.ContainsKey('shown_by_fallback')) { $marks['shown_by_fallback'] } else { $null }
     $internalMs = if ($shownUs) { [math]::Round(($shownUs - $startUs) / 1000, 1) } else { $null }
     $mainMs = if ($marks.ContainsKey('main')) { [math]::Round(($marks['main'] - $startUs) / 1000, 1) } else { $null }
     $webviewMs = if ($marks.ContainsKey('webview_built')) { [math]::Round(($marks['webview_built'] - $startUs) / 1000, 1) } else { $null }
@@ -275,7 +281,7 @@ for ($run = 1; $run -le $Runs; $run++) {
         evicted_mb       = $evictedMb
     }
     $samples += $sample
-    Write-Host ("run {0,2}: wall {1,7} ms  internal {2,7} ms  main {3,5} ms  webview_built {4,7} ms  shown_by {5}  webview2 {6}  ws {7} MB  private {8} MB  private_ws {9} MB" -f `
+    Write-Host ("run {0,2}: visible {1,7} ms  content {2,7} ms  main {3,5} ms  webview_built {4,7} ms  shown_by {5}  webview2 {6}  ws {7} MB  private {8} MB  private_ws {9} MB" -f `
             $run, $wallMs, $internalMs, $mainMs, $webviewMs, $shownBy, $webviewPids.Count, $sample.total_ws_mb, $sample.total_private_mb, $sample.total_private_ws_mb)
 
     Stop-AppTree $appPid $webviewPids
@@ -313,7 +319,7 @@ $summary = [pscustomobject]@{
 }
 
 Write-Host ''
-Write-Host ("{0}: wall median {1} ms, p95 {2} ms | internal median {3} ms, p95 {4} ms | WebView2 procs {5} | WS {6} MB, private {7} MB, private WS {8} MB" -f `
+Write-Host ("{0}: visible window (wall) median {1} ms, p95 {2} ms | content visible (internal) median {3} ms, p95 {4} ms | WebView2 procs {5} | WS {6} MB, private {7} MB, private WS {8} MB" -f `
         $Mode, $summary.wall_median_ms, $summary.wall_p95_ms, $summary.internal_median_ms, $summary.internal_p95_ms, `
         $summary.webview2_procs_median, $summary.total_ws_median_mb, $summary.total_private_median_mb, $summary.total_private_ws_median_mb)
 

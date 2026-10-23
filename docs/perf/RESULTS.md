@@ -4,6 +4,73 @@ Budgets: `docs/REQUIREMENTS.md` §6.1. Each section is one measurement session; 
 
 ---
 
+## 2026-10-23 · T-111 · Themed window frame shown at creation
+
+**Verdict: PASS for "visible window".** The main window is now created visible, painted in the dark theme
+background (`#1b1d21`, `--bg-app`) with a dark title bar. Warm **process start → visible window: median 95.4 ms
+(p95 109.3 ms)**, budget 500 ms (was 620.9 ms in T-005). **Content visible** (UI first paint, `window_ready`) is
+unchanged at **median 607.1 ms (p95 635.9 ms)**: WebView2 startup still costs about 550 ms. Closing that gap is the
+M1 work (native first-page preview, ROADMAP risk 1).
+
+### Change
+
+- `src-tauri/tauri.conf.json`: main window `"visible": true`, `"theme": "Dark"`, `"backgroundColor": "#1b1d21"`
+  (unchanged). tao shows the frame before wry builds WebView2, and wry gives the WebView2 controller the same
+  background colour.
+- `src-tauri/src/lib.rs`: `window_ready` no longer shows the window. It only writes the `content_ready` startup
+  mark (when `SWIFTPDF_STARTUP_LOG` is set). The 3 s show fallback was removed (nothing to fall back to).
+- `bench/cold-start.ps1`: `internal_ms` now reads `content_ready` (falls back to the old `shown_by_*` marks for
+  older builds). Output is labelled "visible window" (wall) and "content visible" (internal).
+
+Same machine, runtime and method as T-005 (see below). Build: `npm run tauri build`, release exe
+`D:\dev\swiftpdf-target\release\swiftpdf.exe`.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File bench\cold-start.ps1 -Mode warm          -Runs 20 -OutJson D:\dev\swiftpdf-bench\t111-warm.json
+powershell -ExecutionPolicy Bypass -File bench\cold-start.ps1 -Mode fresh-profile -Runs 20 -OutJson D:\dev\swiftpdf-bench\t111-fresh-profile.json
+```
+
+### Results
+
+| Metric | Budget | Median | p95 | Min / max | Result |
+|---|---|---|---|---|---|
+| Warm, **visible window** (wall, n = 20) | < 500 ms | **95.4 ms** | 109.3 ms | 94.0 / 110.2 | **PASS** |
+| Warm, **content visible** (internal, n = 20) | M1 target, see ROADMAP risk 1 | 607.1 ms | 635.9 ms | 583.1 / 644.0 | not yet |
+| First launch after install (fresh profile), visible window (wall, n = 20) | < 500 ms | **100.6 ms** | 111.9 ms | 94.3 / 134.7 | **PASS** |
+| First launch after install (fresh profile), content visible (internal, n = 20) | M1 target | 641.9 ms | 682.3 ms | 618.1 / 1,067.1 | not yet |
+
+Other medians (warm): `main` 9 ms, `webview_built` 561 ms, 6 `msedgewebview2.exe` processes, private working set
+of the tree 64.7 MB (fresh profile: 69.7 MB). No timeouts. The `evict` mode was not re-run: it pages out the
+user's other applications, and the change cannot make it slower (the frame now appears before WebView2 loads).
+
+### No white flash (pixel check)
+
+A scratch script launched the exe, found the main window by process id and title, and captured **only that
+window** with `PrintWindow(hwnd, PW_RENDERFULLCONTENT)` (the window's own DWM content, nothing behind it) as
+fast as possible (one frame every 15 to 35 ms) from the moment it became visible until 1 s later. For every frame
+it counted pixels brighter than 160/255 (average of R, G, B) in the client area and in the title bar. 3 runs plus
+2 earlier runs, about 60 frames each, all reviewed as numbers and spot-checked as images:
+
+| Time after process start | Client area | Bright pixels |
+|---|---|---|
+| First visible frame (~95 ms) | black `(0,0,0)` for one frame, dark title bar with white caption text | 0.00 % client, 0.22 % title (caption text and icon) |
+| ~125 ms → content ready | `--bg-app` `#1b1d21` (sampled 26,28,32) | 0.00 % |
+| One frame at WebView2 hand-over (~585 to 630 ms) | part of the client area briefly `#121212`-ish (sampled 17 to 20), rest `#1b1d21` | 0.00 % |
+| After content ready | `#1b1d21` | 0.00 % |
+
+No frame had a white or light client area. Two short dark-on-dark changes remain (black first frame, one
+`#121212` frame at WebView2 hand-over); both are darker than the theme background, not lighter. The `#121212`
+frame is most likely Chromium's dark default canvas (`<meta name="color-scheme" content="dark light">`) before
+`app.css` applies; inlining the background colour into `index.html` would remove it (frontend, optional).
+A screen-region capture (BitBlt) also showed the DWM open animation fading the dark frame in over the content
+behind it, with no white frame. Not checked: the light theme and high-contrast modes (the light theme does not
+exist yet; `"theme": "Dark"` forces a dark title bar even when Windows is set to light).
+
+Trade-off kept from T-005: for about 500 ms the user sees an empty dark frame that does not respond to dragging,
+because tao's main thread is blocked in WebView2 creation.
+
+---
+
 ## 2026-10-23 · T-005 · Cold start of the empty Tauri window
 
 **Verdict: FAIL.** Process start to visible, painted window has a **median of 621 ms (p95 905 ms) warm**,
