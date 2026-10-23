@@ -1,12 +1,14 @@
 // SubagentStop hook: commit everything the subagent changed as "[agent-name] summary" and push to origin main.
 const { execFileSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 const MAX_SUBJECT_LENGTH = 72;
 const TRAILER = "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>";
 
 function readStdin() {
   try {
-    return JSON.parse(require("fs").readFileSync(0, "utf8") || "{}");
+    return JSON.parse(fs.readFileSync(0, "utf8") || "{}");
   } catch {
     return {};
   }
@@ -33,10 +35,27 @@ function buildSummary(input, changedFiles) {
   return `update ${shown}${more}`;
 }
 
+// The main session writes the role name here before launching an agent, because roles may run as general-purpose agents.
+function readCurrentRole(cwd) {
+  try {
+    return fs.readFileSync(path.join(cwd, ".git", "claude-current-agent"), "utf8").trim();
+  } catch {
+    return "";
+  }
+}
+
+function logInput(cwd, input) {
+  try {
+    const summary = { time: new Date().toISOString(), keys: Object.keys(input), agent_type: input.agent_type, hook_event_name: input.hook_event_name };
+    fs.appendFileSync(path.join(cwd, ".git", "claude-hook-input.log"), JSON.stringify(summary) + "\n");
+  } catch {}
+}
+
 function main() {
   const input = readStdin();
   const cwd = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
-  const agent = input.agent_type || input.subagent_type || "agent";
+  logInput(cwd, input);
+  const agent = readCurrentRole(cwd) || input.agent_type || input.subagent_type || "agent";
 
   git(["add", "-A"], cwd);
   const changedFiles = git(["diff", "--cached", "--name-only"], cwd).split("\n").filter(Boolean);
