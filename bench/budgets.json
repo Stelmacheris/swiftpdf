@@ -1,0 +1,113 @@
+{
+  "source": "docs/REQUIREMENTS.md section 6.1",
+  "reference_machine": "4-core CPU, 8 GB RAM, SSD, Windows 10",
+  "regression_tolerance": 0.10,
+  "notes": "kind 'max': a metric passes when value < limit. kind 'min': passes when value >= limit. 'metrics' lists the result keys (see bench/run.ps1) checked against the budget; an empty list means nothing measures it yet and 'measured_by' names the task that will. 'coverage' says what part of the user-visible path a metric covers today.",
+  "budgets": [
+    {
+      "id": "cold_start_visible_window",
+      "requirement": "Cold start to visible window",
+      "kind": "max",
+      "limit": 500,
+      "unit": "ms",
+      "metrics": ["cold_start.visible_window_ms"],
+      "coverage": "Process start to visible themed window (bench/cold-start.ps1, warm file cache)."
+    },
+    {
+      "id": "first_page_10mb",
+      "requirement": "Open 10 MB PDF, first page sharp",
+      "kind": "max",
+      "limit": 200,
+      "unit": "ms",
+      "metrics": ["core.first_page_10mb_fresh_ms", "core.first_page_10mb_ms"],
+      "coverage": "Core only: PDFium open + render page 1 at 1280 px. No IPC or UI paint until T-018/T-020.",
+      "measured_by": "T-018, T-020 (end to end)"
+    },
+    {
+      "id": "first_page_1000_pages",
+      "requirement": "Open 1,000-page / 300 MB PDF, first page (no full parse)",
+      "kind": "max",
+      "limit": 400,
+      "unit": "ms",
+      "metrics": ["core.first_page_300mb_fresh_ms", "core.first_page_300mb_ms"],
+      "coverage": "Core only: PDFium open + render page 1 at 1280 px. No IPC or UI paint until T-018/T-020.",
+      "measured_by": "T-018, T-020 (end to end)"
+    },
+    {
+      "id": "scroll_fps",
+      "requirement": "Scrolling at 60 fps",
+      "kind": "min",
+      "limit": 60,
+      "unit": "fps",
+      "metrics": [],
+      "measured_by": "T-021 (scroll trace in WebView2)"
+    },
+    {
+      "id": "scroll_sharp_tile",
+      "requirement": "Scrolling: sharp tile shown",
+      "kind": "max",
+      "limit": 100,
+      "unit": "ms",
+      "metrics": [],
+      "measured_by": "T-020, T-021 (tile protocol and scheduler)"
+    },
+    {
+      "id": "zoom_rerender",
+      "requirement": "Zoom: re-render sharp tiles",
+      "kind": "max",
+      "limit": 150,
+      "unit": "ms",
+      "metrics": ["core.rerender_page1_10mb_ms"],
+      "coverage": "Core proxy: re-render of a whole open page at 1280 px. No tiles, IPC or paint yet.",
+      "measured_by": "T-020, T-021 (tiles)"
+    },
+    {
+      "id": "find_first_hit",
+      "requirement": "Find over 1,000 pages, first hit",
+      "kind": "max",
+      "limit": 300,
+      "unit": "ms",
+      "metrics": [],
+      "measured_by": "find feature task (S-01)"
+    },
+    {
+      "id": "memory_idle",
+      "requirement": "Memory: idle with 1 small PDF (includes WebView2)",
+      "kind": "max",
+      "limit": 120,
+      "unit": "MB",
+      "metrics": ["memory.idle_private_ws_mb"],
+      "coverage": "Empty window, no PDF open yet (the app cannot open files before T-018). Private working set of the app and all WebView2 processes (bench/memory.ps1).",
+      "measured_by": "T-018 (with a PDF open)"
+    },
+    {
+      "id": "memory_1000_pages",
+      "requirement": "Memory: 1,000-page PDF",
+      "kind": "max",
+      "limit": 400,
+      "unit": "MB",
+      "metrics": ["core.peak_ws_300mb_first_page_mb"],
+      "coverage": "Core probe only: peak working set of a process that opened the 300 MB file and rendered page 1. No WebView2, no tile cache yet.",
+      "measured_by": "T-020 (tile cache), then bench/memory.ps1 -AppPid with the file open"
+    },
+    {
+      "id": "installer_size",
+      "requirement": "Installer size (excluding the WebView2 runtime)",
+      "kind": "max",
+      "limit": 15,
+      "unit": "MB",
+      "metrics": ["size.payload_mb"],
+      "coverage": "Uncompressed payload (swiftpdf.exe + pdfium.dll). The installer is compressed, so this is an upper bound until bundling exists.",
+      "measured_by": "installer task (bundling)"
+    },
+    {
+      "id": "incremental_save",
+      "requirement": "Incremental save, 1 annotation on 300 MB file",
+      "kind": "max",
+      "limit": 300,
+      "unit": "ms",
+      "metrics": [],
+      "measured_by": "save/annotation task"
+    }
+  ]
+}

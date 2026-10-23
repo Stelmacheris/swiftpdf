@@ -1,0 +1,133 @@
+﻿{
+    "schema":  1,
+    "date":  "2026-10-23T07:24:11",
+    "label":  "T-010 baseline",
+    "commit":  "145281c+dirty",
+    "affinity":  "all",
+    "machine":  {
+                    "cpu":  "AMD Ryzen 5 2600 Six-Core Processor",
+                    "cores":  6,
+                    "logical":  12,
+                    "ram_gb":  15.9,
+                    "os":  "Microsoft Windows 10 Pro 10.0.19045",
+                    "exe_disk":  "D: HDD (ST1000DM010-2EP102)",
+                    "corpus_disk":  "D: HDD (ST1000DM010-2EP102)",
+                    "webview2_disk":  "C: SSD (Apacer AS350 512GB)"
+                },
+    "settings":  {
+                     "cold_start_runs":  20,
+                     "probe_runs":  9,
+                     "memory_runs":  5,
+                     "render_width_px":  1280,
+                     "criterion_samples":  20,
+                     "skipped":  [
+
+                                 ],
+                     "raw_dir":  "D:\\dev\\swiftpdf-bench\\raw-20261023-072036"
+                 },
+    "metrics":  {
+                    "core.first_page_10mb_ms":  {
+                                                    "value":  12.042,
+                                                    "unit":  "ms",
+                                                    "better":  "lower",
+                                                    "ci_low_ms":  11.868,
+                                                    "ci_high_ms":  12.262,
+                                                    "source":  "criterion first_page/open_render_10mb"
+                                                },
+                    "core.first_page_10mb_fresh_ms":  {
+                                                          "value":  13.452,
+                                                          "unit":  "ms",
+                                                          "better":  "lower",
+                                                          "first_run_ms":  14.770,
+                                                          "source":  "first-page-probe (fresh process)",
+                                                          "max_ms":  14.77,
+                                                          "n":  9
+                                                      },
+                    "core.pdfium_bind_ms":  {
+                                                "value":  5.954,
+                                                "unit":  "ms",
+                                                "better":  "lower",
+                                                "n":  9,
+                                                "source":  "first-page-probe (load pdfium.dll + init)"
+                                            },
+                    "core.first_page_300mb_ms":  {
+                                                     "value":  11.553,
+                                                     "unit":  "ms",
+                                                     "better":  "lower",
+                                                     "ci_low_ms":  11.428,
+                                                     "ci_high_ms":  11.794,
+                                                     "source":  "criterion first_page/open_render_300mb"
+                                                 },
+                    "core.first_page_300mb_fresh_ms":  {
+                                                           "value":  13.907,
+                                                           "unit":  "ms",
+                                                           "better":  "lower",
+                                                           "first_run_ms":  15.208,
+                                                           "source":  "first-page-probe (fresh process)",
+                                                           "max_ms":  15.208,
+                                                           "n":  9
+                                                       },
+                    "core.peak_ws_300mb_first_page_mb":  {
+                                                             "value":  26.3,
+                                                             "unit":  "MB",
+                                                             "better":  "lower",
+                                                             "n":  9,
+                                                             "source":  "first-page-probe peak working set"
+                                                         },
+                    "core.rerender_page1_10mb_ms":  {
+                                                        "value":  10.438,
+                                                        "unit":  "ms",
+                                                        "better":  "lower",
+                                                        "ci_low_ms":  10.156,
+                                                        "ci_high_ms":  10.554,
+                                                        "source":  "criterion first_page/rerender_page1_10mb"
+                                                    },
+                    "cold_start.visible_window_ms":  {
+                                                         "value":  94.45,
+                                                         "unit":  "ms",
+                                                         "better":  "lower",
+                                                         "p95_ms":  110.6,
+                                                         "source":  "cold-start.ps1 warm, wall",
+                                                         "n":  20
+                                                     },
+                    "cold_start.content_visible_ms":  {
+                                                          "value":  591.25,
+                                                          "unit":  "ms",
+                                                          "better":  "lower",
+                                                          "p95_ms":  618.2,
+                                                          "source":  "cold-start.ps1 warm, internal",
+                                                          "n":  20
+                                                      },
+                    "cold_start.webview_built_ms":  {
+                                                        "value":  544.15,
+                                                        "unit":  "ms",
+                                                        "better":  "lower",
+                                                        "n":  20,
+                                                        "source":  "cold-start.ps1 warm, Tauri setup hook"
+                                                    },
+                    "memory.idle_private_ws_mb":  {
+                                                      "value":  66.4,
+                                                      "unit":  "MB",
+                                                      "better":  "lower",
+                                                      "max_mb":  69.5,
+                                                      "webview2_procs":  6,
+                                                      "source":  "memory.ps1, empty window, app + WebView2 private working set",
+                                                      "n":  5
+                                                  },
+                    "memory.idle_private_bytes_mb":  {
+                                                         "value":  297.1,
+                                                         "unit":  "MB",
+                                                         "better":  "lower",
+                                                         "n":  5,
+                                                         "source":  "memory.ps1, private bytes (commit)"
+                                                     },
+                    "size.payload_mb":  {
+                                            "value":  14.582,
+                                            "unit":  "MB",
+                                            "better":  "lower",
+                                            "exe_mb":  7.35,
+                                            "pdfium_mb":  7.24,
+                                            "source":  "swiftpdf.exe + pdfium.dll, uncompressed"
+                                        }
+                }
+}

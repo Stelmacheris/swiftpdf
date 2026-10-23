@@ -4,6 +4,96 @@ Budgets: `docs/REQUIREMENTS.md` §6.1. Each section is one measurement session; 
 
 ---
 
+## 2026-10-23 · T-010 · Benchmark harness and first baseline
+
+**Verdict: every measured metric is within budget.** This is the first baseline (`bench/baseline.json`).
+Six §6.1 budgets now have a metric; four (scroll fps, sharp tile, find, incremental save) cannot be measured
+yet because the features do not exist. The first-page numbers are **core only** (PDFium open + render, no IPC
+or UI paint). The idle-memory number is the **empty window** (the app cannot open a PDF before T-018).
+
+### Harness
+
+| Part | File | What it measures |
+|---|---|---|
+| Budgets | `bench/budgets.json` | All 11 §6.1 budgets (limit, unit, `max`/`min`), the result keys that check each one, and what each metric covers today |
+| Criterion benches | `bench/benches/first_page.rs` (crate `swiftpdf-bench`) | `open_render_10mb`, `open_render_300mb`: open + render page 1 at 1280 px + close; `rerender_page1_10mb`: render page 1 of an open document again (zoom proxy). One engine, so caches are warm (steady state). 20 samples, 5 s each |
+| Fresh-process probe | `bench/src/bin/first-page-probe.rs` | One open + render of page 1 in a new process (PDFium bind, cold PDFium caches), plus the process's peak working set. Run 9 times per file; median reported, first run kept as `first_run_ms` |
+| Cold start | `bench/cold-start.ps1` (T-005/T-111) | Warm mode, 20 launches: visible window (wall), content visible (internal), WebView2 built |
+| Memory sampler | `bench/memory.ps1` | Private working set summed over the app **and all descendant processes** (6 `msedgewebview2.exe`), re-listed every sample. Launch mode: 5 launches, 5 s settle, 1 sample/s for 10 s. Attach mode (`-AppPid`) for a running app with a document open |
+| Payload size | in `bench/run.ps1` | `swiftpdf.exe` + `pdfium.dll`, uncompressed (proxy for installer size) |
+| Runner | `bench/run.ps1` | Builds, runs all parts, writes one JSON file (default `D:\dev\swiftpdf-bench\results-<stamp>.json`, raw outputs in `raw-<stamp>\`). `-Affinity 0x55` restricts the run and all child processes to 4 cores. `-Skip core,app,memory,size` |
+| Compare | `bench/compare.ps1` | Exit 1 if any metric breaks its budget or is > 10 % worse than `bench/baseline.json`; exit 2 on bad input. Missing metrics warn (fail with `-Strict`) |
+
+Checked by hand: compare against itself → exit 0; a copy with visible window +11.2 %, idle memory +10.1 % and
+first page 250 ms → exit 1 with `REGRESSION`, `REGRESSION` and `OVER BUDGET, REGRESSION`; a missing results
+file → exit 2. Affinity inheritance checked: a child of a process with mask 0x55 reports 0x55 (85).
+
+### Setup
+
+| Item | Value |
+|---|---|
+| Commit | `145281c` plus the uncommitted T-010 changes |
+| Build | `npm run tauri build` (rebuilt for this session) → `D:\dev\swiftpdf-target\release\swiftpdf.exe` (7.35 MB); benches in cargo's `bench` profile (release, LTO) |
+| PDFium | `src-tauri/pdfium/pdfium.dll` (7.24 MB), pinned build from `scripts/fetch-pdfium.ps1` |
+| Corpus | Generated `large_10mb.pdf` (10 pages, one 1 MB noise image each) and `large_1000pages_300mb.pdf` (1,000 pages, one 315 KB noise image each) |
+| Machine | AMD Ryzen 5 2600 (6C/12T), 16 GB RAM, Windows 10 Pro 22H2 (build 19045) — **not** the 4-core/8 GB reference machine |
+| Disks | Exe and corpus on D: = Seagate ST1000DM010 **HDD**; WebView2 runtime and profile on C: = Apacer AS350 SATA **SSD** (recorded by `run.ps1` in `machine.*_disk`) |
+| Background | Normal desktop session; other WebView2 hosts running (as in T-005) |
+
+```powershell
+. .\scripts\dev-env.ps1
+powershell -ExecutionPolicy Bypass -File bench\run.ps1 -Label 'T-010 baseline' -OutJson D:\dev\swiftpdf-bench\t010-baseline.json
+powershell -ExecutionPolicy Bypass -File bench\run.ps1 -Affinity 0x55 -Label 'T-010 4 cores (affinity 0x55)' -OutJson D:\dev\swiftpdf-bench\t010-4core.json
+Copy-Item D:\dev\swiftpdf-bench\t010-baseline.json bench\baseline.json
+powershell -ExecutionPolicy Bypass -File bench\compare.ps1 -Results D:\dev\swiftpdf-bench\t010-4core.json
+```
+
+### Results (medians)
+
+"4 cores" = the whole run with CPU affinity 0x55 (one logical CPU on each of 4 physical cores, no SMT), the
+closest cheap stand-in for the 4-core reference CPU. RAM was not limited to 8 GB.
+
+| Metric (result key) | Budget | Baseline, 6 cores | 4 cores | Result |
+|---|---|---|---|---|
+| Cold start → visible window (`cold_start.visible_window_ms`, n = 20) | < 500 ms | **94.5 ms** (p95 110.6) | 94.3 ms (p95 108.1) | **PASS** |
+| Cold start → content visible (`cold_start.content_visible_ms`, n = 20) | none (M1 target) | 591.3 ms (p95 618.2) | 602.5 ms (p95 631.1) | info |
+| 10 MB first page, fresh process (`core.first_page_10mb_fresh_ms`, n = 9) | < 200 ms | **13.5 ms** (first run 14.8) | 13.8 ms | **PASS** (core only) |
+| 10 MB first page, criterion (`core.first_page_10mb_ms`) | < 200 ms | 12.0 ms (CI 11.9–12.3) | 13.0 ms | **PASS** (core only) |
+| 300 MB / 1,000 pages first page, fresh process (`core.first_page_300mb_fresh_ms`, n = 9) | < 400 ms | **13.9 ms** (first run 15.2) | 13.9 ms | **PASS** (core only) |
+| 300 MB / 1,000 pages first page, criterion (`core.first_page_300mb_ms`) | < 400 ms | 11.6 ms (CI 11.4–11.8) | 12.7 ms | **PASS** (core only) |
+| Re-render open page at 1280 px (`core.rerender_page1_10mb_ms`) | < 150 ms (zoom, proxy) | 10.4 ms | 11.2 ms | **PASS** (proxy) |
+| PDFium bind (`core.pdfium_bind_ms`) | none | 6.0 ms | 5.9 ms | info |
+| Idle memory, empty window, app + WebView2 private WS (`memory.idle_private_ws_mb`, n = 5) | < 120 MB | **66.4 MB** (max 69.5) | 66.7 MB | **PASS** (no PDF open) |
+| Idle private bytes (commit) (`memory.idle_private_bytes_mb`) | none | 297.1 MB | 298.1 MB | info |
+| 300 MB file, core peak working set (`core.peak_ws_300mb_first_page_mb`) | < 400 MB | 26.3 MB | 26.4 MB | **PASS** (core only, no WebView2 or tile cache) |
+| Payload exe + pdfium.dll (`size.payload_mb`) | < 15 MB installer | 14.58 MB | – | **PASS, 0.4 MB margin** (uncompressed) |
+| Scroll 60 fps / sharp tile < 100 ms / find first hit < 300 ms / incremental save < 300 ms | see §6.1 | not measurable yet | – | T-020, T-021, find and save tasks |
+
+Idle memory breakdown (one run): WebView2 browser 30.4 MB, GPU 12.5, renderer 11.4, network service 7.5,
+`swiftpdf.exe` 3.7, storage service 2.9, crashpad 2.4.
+
+### Notes and risks
+
+- **The first-page numbers flatter the product.** They cover PDFium only; the end-to-end budget also pays IPC,
+  pixel transfer to WebView2 and paint (T-018/T-020). And the corpus pages are one image each: real 10 MB
+  files with many fonts and vector paths will render slower. A realistic text/vector-heavy large file should be
+  added to the corpus before M1.
+- **Disk cache.** All numbers are with the PDF in the file cache. The first probe run is the only one that could
+  read from the HDD, and it was already cached by earlier work (14.8 ms). A true cold-disk open was not measured:
+  eviction pushes other apps out of memory (see T-005).
+- **4 cores changed little.** PDFium rendering is single-threaded and WebView2 start-up is not CPU-bound here.
+  The criterion numbers were 7–10 % slower under the mask; part of that is run-to-run noise (see next point).
+- **Noise against the 10 % rule.** The criterion medians moved by up to ~10 % between sessions on this desktop
+  (12.0 vs 13.0 ms), so a hard 10 % gate on ~12 ms steady-state benches will flap on a shared or hosted
+  machine. Cold start (±1 ms on 94 ms) and memory (±0.5 %) were stable. T-012 plans warn-only on hosted
+  runners; for the self-hosted gate (T-047) consider more criterion samples or an absolute floor.
+- **Installer budget is tight**: 14.58 MB uncompressed today, with no installer, no fonts and almost no UI yet.
+  The compressed installer will be smaller, but this needs watching once bundling exists.
+- Cold-start numbers match T-111 (94.5 vs 95.4 ms visible, 591 vs 607 ms content). The first launch after a
+  rebuild was slower (235 ms visible, `main` at 101 ms; Defender scan) in a trial run and is not in the baseline.
+
+---
+
 ## 2026-10-23 · T-111 · Themed window frame shown at creation
 
 **Verdict: PASS for "visible window".** The main window is now created visible, painted in the dark theme

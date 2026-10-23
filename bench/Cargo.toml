@@ -1,0 +1,32 @@
+[package]
+name = "swiftpdf-bench"
+description = "SwiftPDF benchmark harness (T-010): criterion benches and the first-page probe for the REQUIREMENTS.md §6.1 budgets."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+# criterion 0.8 needs Rust 1.86; the rest of the workspace keeps 1.80.
+rust-version = "1.86"
+publish = false
+
+[lib]
+name = "swiftpdf_bench"
+
+[[bin]]
+name = "first-page-probe"
+path = "src/bin/first-page-probe.rs"
+
+[[bench]]
+name = "first_page"
+harness = false
+
+[dependencies]
+swiftpdf-core = { path = "../crates/swiftpdf-core" }
+
+[target.'cfg(windows)'.dependencies]
+# MIT OR Apache-2.0. Only for the probe's own memory counters (GetProcessMemoryInfo).
+windows-sys = { version = "0.61", features = ["Win32_System_ProcessStatus", "Win32_System_Threading"] }
+
+[dev-dependencies]
+# MIT OR Apache-2.0. Default features off: no plotters/HTML reports, no rayon.
+criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
