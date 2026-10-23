@@ -77,7 +77,6 @@ Req = requirement implemented. "ID" is the stable command ID (keymap.md).
 | Tools | Select text | `tool.select` | V-13 | M1 |
 | Tools | Hand (pan) | `tool.hand` | V-07 | M1 |
 | Tools | Copy | `edit.copy` | V-13 | M1 |
-| Clipboard-less | (no Paste on Home in v1; paste appears in Comment for images) | n/a | n/a | n/a |
 
 ### 4.2 Comment (lazy chunk) (v1.0 / M2)
 
@@ -138,8 +137,7 @@ XFA documents (F-08): this tab shows an inline notice in the canvas, not in the 
 | Redact | Scrub metadata | `redact.scrubMetadata` | X-04 | v1.1 |
 | Status | Safe mode (read-only status button; explains what is blocked) | `protect.safeModeInfo` | X-06 | M1 |
 
-The Protect tab appears in the tab row from M1 only if `protect.safeModeInfo` is its single command; to keep the tab
-row stable the six tabs are always shown, and an empty-ish tab shows only its available commands.
+The six tabs are always shown so the tab row never changes between releases. A tab shows only the commands that exist in the current build.
 
 ### 4.6 View (first-paint bundle) (M1)
 
