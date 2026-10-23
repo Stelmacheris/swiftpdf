@@ -1,10 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark light" />
+    <!-- Dark canvas before any CSS arrives; avoids a light or grey frame at the WebView2 handover. -->
+    <meta name="color-scheme" content="dark" />
     <title>SwiftPDF</title>
+    <!-- Render-blocking theme tokens (dark default) so the first painted frame already has --bg-app. -->
+    <link rel="stylesheet" href="/src/theme.css" />
   </head>
   <body>
     <div id="app"></div>

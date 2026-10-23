@@ -1,0 +1,178 @@
+/* Theme tokens from docs/design/theme.md (T-002), which is the source of truth. Dark is the default. */
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* surfaces */
+  --bg-app: #1b1d21; /* window, tab bar strip */
+  --bg-surface: #23262b; /* ribbon, sidebar, status bar, dialogs */
+  --bg-raised: #2c3036; /* menus, popovers, inputs, active tab */
+  --bg-hover: #343942;
+  --bg-pressed: #3d434d;
+  --bg-selected: #1f3a5f; /* always paired with --selected-bar */
+  --bg-canvas: #2b2e33; /* area behind the pages */
+
+  /* text */
+  --text: #e8eaed;
+  --text-muted: #a9b0ba;
+  --text-disabled: #7b848f;
+  --link: #8ab4f8;
+
+  /* accent and status */
+  --accent: #5aa2ff;
+  --on-accent: #0b1220;
+  --danger: #ff8a80;
+  --success: #5fd38d;
+  --warn: #e3b341;
+  --selected-bar: #5aa2ff;
+
+  /* lines */
+  --border-ui: #7b848f; /* control and input borders (needs 3:1) */
+  --border-subtle: #3a3f47; /* decorative dividers only */
+
+  /* focus */
+  --focus-ring: #8cc8ff;
+  --focus-width: 2px;
+  --focus-offset: 2px;
+
+  /* misc */
+  --page-border: var(--border-ui);
+  --shadow-menu: 0 4px 16px rgb(0 0 0 / 0.5);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-app: #f3f4f6;
+  --bg-surface: #ffffff;
+  --bg-raised: #eceef1;
+  --bg-hover: #e1e4e9;
+  --bg-pressed: #d4d8df;
+  --bg-selected: #d6e6ff;
+  --bg-canvas: #d9dce1;
+
+  --text: #1c1f24;
+  --text-muted: #4b5563;
+  --text-disabled: #6b7280;
+  --link: #0b5cd5;
+
+  --accent: #0b5cd5;
+  --on-accent: #ffffff;
+  --danger: #b42318;
+  --success: #166534;
+  --warn: #8a5a00;
+  --selected-bar: #0b5cd5;
+
+  --border-ui: #6b7280;
+  --border-subtle: #d0d4db;
+
+  --focus-ring: #0b5cd5;
+  --focus-width: 2px;
+  --focus-offset: 2px;
+
+  --page-border: var(--border-ui);
+  --shadow-menu: 0 4px 16px rgb(0 0 0 / 0.18);
+}
+
+/* shared, theme-independent */
+:root {
+  --font-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-size-ui: 0.8125rem; /* 13px at 100% text size; rem so it follows the Windows text-size setting */
+  --radius: 4px;
+  --control-height: 32px;
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+
+  /* page-color presets (V-09); they recolor only the rendered page */
+  --page-normal-fg: #1c1f24;
+  --page-normal-bg: #ffffff;
+  --page-dark-fg: #e0e0e0;
+  --page-dark-bg: #1e1e1e;
+  --page-sepia-fg: #3b2f1e;
+  --page-sepia-bg: #f4ecd8;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  height: 100%;
+  background: var(--bg-app);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-ui);
+}
+
+/* every interactive element; never remove an outline without replacing it */
+:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+@media (forced-colors: active) {
+  :root,
+  :root[data-theme="dark"],
+  :root[data-theme="light"] {
+    --bg-app: Canvas;
+    --bg-surface: Canvas;
+    --bg-raised: Canvas;
+    --bg-hover: Canvas;
+    --bg-pressed: Canvas;
+    --bg-canvas: Canvas;
+    --bg-selected: Highlight;
+    --text: CanvasText;
+    --text-muted: CanvasText;
+    --text-disabled: GrayText;
+    --link: LinkText;
+    --accent: Highlight;
+    --on-accent: HighlightText;
+    --selected-bar: Highlight;
+    --danger: CanvasText; /* meaning carried by icon + text */
+    --success: CanvasText;
+    --warn: CanvasText;
+    --border-ui: ButtonBorder;
+    --border-subtle: ButtonBorder;
+    --focus-ring: Highlight;
+    --page-border: CanvasText;
+    --shadow-menu: none;
+  }
+
+  /* hover and pressed need a visible cue because fills collapse to Canvas */
+  .btn:hover,
+  .menu-item:hover {
+    outline: 1px solid Highlight;
+  }
+  .btn[aria-pressed="true"],
+  .tab[aria-selected="true"],
+  [aria-current="page"] {
+    outline: 2px solid Highlight;
+    background: Canvas;
+    color: CanvasText;
+  }
+  .menu-item[aria-selected="true"] {
+    background: Highlight;
+    color: HighlightText;
+  }
+  /* the rendered page keeps its own pixels; only the frame is system-colored */
+  .page-canvas {
+    forced-color-adjust: none;
+    border: 1px solid CanvasText;
+  }
+  svg.icon {
+    forced-color-adjust: auto;
+    fill: currentColor;
+    stroke: currentColor;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

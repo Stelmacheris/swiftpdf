@@ -1,0 +1,11 @@
+dist/
+node_modules/
+src-tauri/
+crates/
+bench/
+scripts/
+docs/
+target/
+package-lock.json
+Cargo.lock
+.claude/
