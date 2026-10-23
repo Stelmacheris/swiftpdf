@@ -1,7 +1,9 @@
 //! Tauri shell for SwiftPDF. Keeps only window and IPC wiring; all document logic
 //! lives in the `swiftpdf-core` crate.
 
-use std::time::Duration;
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use tauri::{AppHandle, Manager, Runtime};
 
@@ -12,35 +14,60 @@ const MAIN_WINDOW: &str = "main";
 /// If the UI never reports (for example a script error), show it anyway after this delay.
 const SHOW_FALLBACK_DELAY: Duration = Duration::from_secs(3);
 
+/// Benchmark hook for `bench/cold-start.ps1`. Off by default: only when this variable names a
+/// file are startup marks appended to it, as `<mark> <microseconds since the Unix epoch>`.
+const STARTUP_LOG_ENV: &str = "SWIFTPDF_STARTUP_LOG";
+
 /// Shows the main window. Called by the UI right after its first paint, so the user
 /// never sees an empty white WebView.
 #[tauri::command]
 fn window_ready<R: Runtime>(app: AppHandle<R>) {
-    show_main_window(&app);
+    show_main_window(&app, "shown_by_ui");
 }
 
-fn show_main_window<R: Runtime>(app: &AppHandle<R>) {
+fn show_main_window<R: Runtime>(app: &AppHandle<R>, mark: &str) {
     let Some(window) = app.get_webview_window(MAIN_WINDOW) else {
         return;
     };
     // Showing an already visible window is a no-op, so the fallback and the UI call can race safely.
-    if let Err(error) = window.show() {
-        eprintln!("swiftpdf: could not show the main window: {error}");
+    match window.show() {
+        Ok(()) => log_startup_mark(mark),
+        Err(error) => eprintln!("swiftpdf: could not show the main window: {error}"),
     }
+}
+
+/// Appends a timestamped startup mark to the file named by `SWIFTPDF_STARTUP_LOG`, if set.
+fn log_startup_mark(mark: &str) {
+    let Some(path) = std::env::var_os(STARTUP_LOG_ENV) else {
+        return;
+    };
+    let Ok(since_epoch) = SystemTime::now().duration_since(UNIX_EPOCH) else {
+        return;
+    };
+    let line = format!("{mark} {}\n", since_epoch.as_micros());
+    // Timing is best effort; a failed write must never affect the app.
+    let _ = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+        .and_then(|mut file| file.write_all(line.as_bytes()));
 }
 
 fn spawn_show_fallback<R: Runtime>(app: AppHandle<R>) {
     std::thread::spawn(move || {
         std::thread::sleep(SHOW_FALLBACK_DELAY);
-        show_main_window(&app);
+        show_main_window(&app, "shown_by_fallback");
     });
 }
 
 /// Builds and runs the Tauri application.
 pub fn run() {
+    log_startup_mark("main");
     let result = tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![window_ready])
         .setup(|app| {
+            // Tauri runs this hook after it has built the config windows and their WebView2.
+            log_startup_mark("webview_built");
             spawn_show_fallback(app.handle().clone());
             Ok(())
         })
