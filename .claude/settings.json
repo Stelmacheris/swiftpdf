@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/commit-agent.js\"",
+            "timeout": 120,
+            "statusMessage": "Committing and pushing agent changes..."
+          }
+        ]
+      }
+    ]
+  }
+}

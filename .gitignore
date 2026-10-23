@@ -1,0 +1,16 @@
+# Build output
+node_modules/
+dist/
+target/
+src-tauri/target/
+src-tauri/gen/
+
+# Local-only Claude Code settings
+.claude/settings.local.json
+
+# OS / editor
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+*.log
