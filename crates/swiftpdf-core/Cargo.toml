@@ -8,3 +8,9 @@ authors.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+# MIT OR Apache-2.0. Bound dynamically to the PDFium build pinned in scripts/fetch-pdfium.ps1.
+# pdfium_7881 is the newest API level this release knows; PDFium 8111 only adds functions and
+# appends versioned fields to FPDF_LIBRARY_CONFIG, so the 7881 bindings are compatible (T-009).
+# `thread_safe` is off on purpose: the engine serializes all calls on one owner thread.
+pdfium-render = { version = "=0.9.4", default-features = false, features = ["pdfium_7881"] }
+thiserror = "2"

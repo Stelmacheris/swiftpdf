@@ -3,6 +3,13 @@
 //! Holds everything that does not depend on the UI shell: the document manager,
 //! render scheduler, tile cache and editing services (see REQUIREMENTS.md §7).
 //! The Tauri app in `src-tauri/` is a thin layer over this crate.
+//! All PDFium access goes through [`engine::PdfEngine`], which owns the single PDFium thread.
+
+pub mod engine;
+pub mod error;
+
+pub use engine::{DocumentId, DocumentInfo, PdfEngine, RenderedPage};
+pub use error::CoreError;
 
 /// Product name shown in the window title and dialogs.
 pub const PRODUCT_NAME: &str = "SwiftPDF";
