@@ -1,5 +1,5 @@
-/// <reference types="vitest" />
-import { defineConfig, type Plugin } from "vite";
+import type { Plugin } from "vite";
+import { defineConfig } from "vitest/config";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -7,15 +7,13 @@ import { gzipSync } from "node:zlib";
 
 // Prints the gzipped size of everything index.html loads up front (scripts, stylesheets, modulepreloads).
 // Lazy chunks reached only through dynamic import() are not counted.
+// Runs in writeBundle so it only fires after a successful build has written dist/.
 function firstPaintSize(): Plugin {
-  let outDir = "dist";
   return {
     name: "swiftpdf-first-paint-size",
     apply: "build",
-    configResolved(config) {
-      outDir = resolve(config.root, config.build.outDir);
-    },
-    closeBundle() {
+    writeBundle(options) {
+      const outDir = resolve(options.dir ?? "dist");
       const html = readFileSync(resolve(outDir, "index.html"), "utf8");
       const urls = [...html.matchAll(/<(?:script|link)[^>]+(?:src|href)="\/?([^"]+\.(?:js|css))"/g)].map(
         (match) => match[1],
@@ -55,7 +53,8 @@ export default defineConfig({
   build: {
     // WebView2 on Windows 10/11 is Chromium-based and evergreen.
     target: "chrome105",
-    minify: "esbuild",
+    // Vite 8 minifies with Oxc by default; esbuild is no longer bundled.
+    minify: "oxc",
     sourcemap: false,
   },
   test: {
