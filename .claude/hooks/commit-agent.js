@@ -55,6 +55,8 @@ function main() {
   const input = readStdin();
   const cwd = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
   logInput(cwd, input);
+  // Internal helpers (e.g. progress summaries) also fire SubagentStop with an empty agent_type; only real agents commit.
+  if (!input.agent_type) return;
   const agent = readCurrentRole(cwd) || input.agent_type || input.subagent_type || "agent";
 
   git(["add", "-A"], cwd);
