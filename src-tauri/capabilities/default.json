@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimal permissions for the main window: only the app commands the UI calls. No shell, http or fs plugins.",
+  "windows": ["main"],
+  "permissions": ["allow-window-ready"]
+}

@@ -5,6 +5,13 @@ target/
 src-tauri/target/
 src-tauri/gen/
 
+# PDFium binaries (fetched by scripts/fetch-pdfium.ps1, never committed)
+src-tauri/pdfium/
+
+# Generated test corpus (large files live in D:\dev\swiftpdf-corpus; never commit generated output)
+tests/corpus/generated/
+swiftpdf-corpus/
+
 # Local-only Claude Code settings
 .claude/settings.local.json
 
